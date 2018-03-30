@@ -4,9 +4,15 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"time"
 )
 
-var history []string
+var history []temperatureLog
+
+type temperatureLog struct {
+	Temperature string `json:"temperature"`
+	DateCreated time.Time `json:"dateCreated"`
+}
 
 type testStruct struct {
 	Temperature string
@@ -34,18 +40,22 @@ func handlePost(rw http.ResponseWriter, request *http.Request) {
 
 	// f, err := strconv.ParseFloat("3.1415", 64)
 	fmt.Println(t.Temperature)
-	history = append(history, t.Temperature)
+
+	var tempLog temperatureLog
+	tempLog.Temperature = t.Temperature
+	tempLog.DateCreated = time.Now()
+	history = append(history, tempLog)
 
 	rw.WriteHeader(http.StatusOK)
 	rw.Write([]byte("OK"))
 }
 
 func handleGet(rw http.ResponseWriter, request *http.Request) {
-	var encoder = json.NewEncoder(rw)
-	var err = encoder.Encode(history)
+	var b, err = json.Marshal(history)
 	if err != nil {
 		panic(err)
 	}
+	rw.Write(b)
 }
 
 func main() {
