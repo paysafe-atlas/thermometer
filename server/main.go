@@ -9,10 +9,10 @@ import (
 	"encoding/csv"
 	"bufio"
 	"io"
+	"log"
 )
 
 var history []temperatureLog
-var historyFile *os.File
 const fileLocation = "historyFile.csv"
 
 type temperatureLog struct {
@@ -39,6 +39,9 @@ func parseGhPost(rw http.ResponseWriter, request *http.Request) {
 		handleGet(rw, request)
 	} else if request.Method == "POST" {
 		handlePost(rw, request)
+	} else if request.Method == "OPTIONS" {
+		rw.Header().Set("Access-Control-Allow-Origin", request.Header.Get("Origin"))
+		rw.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
 	} else {
 		rw.WriteHeader(http.StatusMethodNotAllowed)
 	}
@@ -61,6 +64,7 @@ func handlePost(rw http.ResponseWriter, request *http.Request) {
 	tempLog.Temperature = t.Temperature
 	tempLog.DateCreated = time.Now()
 	history = append(history, tempLog)
+	logEntryInFile(tempLog)
 
 	rw.WriteHeader(http.StatusOK)
 	rw.Header().Set("Content-Type", "application/json;charset=utf-8")
@@ -82,7 +86,11 @@ func handleGet(rw http.ResponseWriter, request *http.Request) {
 }
 
 func getLastLogEntry(rw http.ResponseWriter, request *http.Request) {
-	if request.Method != "GET" {
+	if request.Method == "OPTIONS" {
+		rw.Header().Set("Access-Control-Allow-Origin", request.Header.Get("Origin"))
+		rw.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+		return
+	} else if request.Method != "GET" {
 		rw.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
@@ -99,10 +107,7 @@ func getLastLogEntry(rw http.ResponseWriter, request *http.Request) {
 }
 
 func loadHistory() {
-	historyFile, err := os.OpenFile(fileLocation, os.O_APPEND|os.O_CREATE, 600)
-	if err != nil {
-		panic(err)
-	}
+	var historyFile = getHistoryFile()
 	reader := csv.NewReader(bufio.NewReader(historyFile))
 	for {
 		line, error := reader.Read()
@@ -111,10 +116,29 @@ func loadHistory() {
 		} else if error != nil {
 			panic(error)
 		}
-		var dateCreated, _ = time.Parse(time.RFC3339, line[1])
+		var dateCreated, _ = time.Parse(time.RFC3339Nano, line[1])
 		history = append(history, temperatureLog{
 			Temperature: line[0],
 			DateCreated: dateCreated,
 		})
 	}
+	historyFile.Close()
+}
+
+func logEntryInFile(entry temperatureLog) {
+	var historyFile = getHistoryFile()
+	var line = fmt.Sprintf("\n%v,%v", entry.Temperature, entry.DateCreated.Format(time.RFC3339Nano))
+	var _, error = historyFile.WriteString(line)
+	historyFile.Close()
+	if error != nil {
+		log.Fatal(error)
+	}
+}
+
+func getHistoryFile() *os.File {
+	var historyFile, err = os.OpenFile(fileLocation, os.O_APPEND|os.O_CREATE, 600)
+	if err != nil {
+		panic(err)
+	}
+	return historyFile
 }
