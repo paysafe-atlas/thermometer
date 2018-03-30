@@ -1,9 +1,9 @@
 package main
 
 import (
-	"net/http"
 	"encoding/json"
 	"fmt"
+	"net/http"
 )
 
 var history []string
@@ -35,6 +35,9 @@ func handlePost(rw http.ResponseWriter, request *http.Request) {
 	// f, err := strconv.ParseFloat("3.1415", 64)
 	fmt.Println(t.Temperature)
 	history = append(history, t.Temperature)
+
+	rw.WriteHeader(http.StatusOK)
+	rw.Write([]byte("OK"))
 }
 
 func handleGet(rw http.ResponseWriter, request *http.Request) {
@@ -47,5 +50,7 @@ func handleGet(rw http.ResponseWriter, request *http.Request) {
 
 func main() {
 	http.HandleFunc("/temperature/log", parseGhPost)
-	http.ListenAndServe(":80", nil)
+	if err := http.ListenAndServe(":8080", nil); err != nil {
+		panic(err)
+	}
 }
