@@ -47,6 +47,5 @@ func handleGet(rw http.ResponseWriter, request *http.Request) {
 
 func main() {
 	http.HandleFunc("/temperature/log", parseGhPost)
-	http.HandleFunc("/temperature/log", parseGhPost)
 	http.ListenAndServe(":80", nil)
 }
