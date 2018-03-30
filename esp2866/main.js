@@ -16,7 +16,7 @@ function onInit() {
 
     startMeasure(function (temp) {
       console.log("Temp is " + temp + "°C");
-      sendTemp(temp);
+      sendData(temp);
     }, MEASURE_INTERVAL);
   });
 
@@ -26,51 +26,34 @@ function onInit() {
     }, interval);
   }
 
-  function sendTemp(temp) {
-    var content = "{temperature:"+temp+"}";
-    var options = {
-      host: '10.130.11.0:8080', // host ip (host name works as well)
-      port: 8080,            // (optional) port, defaults to 80
-      path: '/temperature/log',           // path sent to server
-      method: 'POST',
-      headers: { "Content-type" : "application/json",
-               "Content-length": content.length} 
-    };
-    
-    var req = require("http").request(options, function(res) {
-      console.log('res',res);
-      res.on('data', function(data) {
-        console.log("HTTP> "+data);
-      });
-      res.on('close', function(data) {
-        console.log("Connection closed");
-      });
+  function sendData(temp) {
+  var content = '{"temperature": "' + temp + '"}';
+  var options = {
+    host: '10.130.11.0', // host ip (host name works as well)
+    port: 8080,            // (optional) port, defaults to 80
+    path: '/temperature/log',           // path sent to server
+    method: 'POST',
+    headers: { "Content-type" : "application/json",
+             "Content-length": content.length} 
+  };
+  
+  var req = require("http").request(options, function(res) {
+    console.log('res',res);
+    res.on('data', function(data) {
+      console.log("HTTP> "+data);
     });
-    
-    req.on('error',function(err){
-      console.log(err);
+    res.on('close', function(data) {
+      console.log("Connection closed");
     });
-    
-    req.end(content);  
-    console.log("Request sent");  
-  }
-
-  function sendTemperature(temp) {
-    var tempDto = {
-      temperature: temp
-    };
-    const payload = JSON.stringify(temp);
-    HTTP_OPTIONS.headers = {"Content-type": "application/json",
-                            "Content-Length": payload.length};
-    var req = http.request(HTTP_OPTIONS, function(res) {
-      console.log('STATUS: ' + res.statusCode);
-      console.log('HEADERS: ' + JSON.stringify(res.headers));
-      res.setEncoding('utf8');
-      res.on('data', function (chunk) {
-        console.log('BODY: ' + chunk);
-      });
-    }).end(payload);
-  }
+  });
+  
+  req.on('error',function(err){
+    console.log(err);
+  });
+  
+  req.end(content);  
+  console.log("Request sent");  
+}
 }
 
 save();  
