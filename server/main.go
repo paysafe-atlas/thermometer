@@ -35,13 +35,12 @@ func main() {
 }
 
 func parseGhPost(rw http.ResponseWriter, request *http.Request) {
+	rw.Header().Set("Access-Control-Allow-Origin", request.Header.Get("Origin"))
+	rw.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
 	if request.Method == "GET" {
 		handleGet(rw, request)
 	} else if request.Method == "POST" {
 		handlePost(rw, request)
-	} else if request.Method == "OPTIONS" {
-		rw.Header().Set("Access-Control-Allow-Origin", request.Header.Get("Origin"))
-		rw.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
 	} else {
 		rw.WriteHeader(http.StatusMethodNotAllowed)
 	}
@@ -86,11 +85,9 @@ func handleGet(rw http.ResponseWriter, request *http.Request) {
 }
 
 func getLastLogEntry(rw http.ResponseWriter, request *http.Request) {
-	if request.Method == "OPTIONS" {
-		rw.Header().Set("Access-Control-Allow-Origin", request.Header.Get("Origin"))
-		rw.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
-		return
-	} else if request.Method != "GET" {
+	rw.Header().Set("Access-Control-Allow-Origin", request.Header.Get("Origin"))
+	rw.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+	if request.Method != "GET" {
 		rw.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
@@ -136,7 +133,7 @@ func logEntryInFile(entry temperatureLog) {
 }
 
 func getHistoryFile() *os.File {
-	var historyFile, err = os.OpenFile(fileLocation, os.O_APPEND|os.O_CREATE, 777)
+	var historyFile, err = os.OpenFile(fileLocation, os.O_APPEND|os.O_CREATE|os.O_RDWR, 777)
 	if err != nil {
 		panic(err)
 	}
