@@ -136,7 +136,7 @@ func logEntryInFile(entry temperatureLog) {
 }
 
 func getHistoryFile() *os.File {
-	var historyFile, err = os.OpenFile(fileLocation, os.O_APPEND|os.O_CREATE, 600)
+	var historyFile, err = os.OpenFile(fileLocation, os.O_APPEND|os.O_CREATE, 777)
 	if err != nil {
 		panic(err)
 	}
