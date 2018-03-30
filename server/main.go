@@ -47,7 +47,10 @@ func handlePost(rw http.ResponseWriter, request *http.Request) {
 	history = append(history, tempLog)
 
 	rw.WriteHeader(http.StatusOK)
-	rw.Write([]byte("OK"))
+	rw.Header().Set("Content-Type", "application/json;charset=utf-8")
+	rw.Header().Set("Cache-Control", "max-age=0, no-cache, no-store")
+	rw.Header().Set("pragma", "no-cache")
+	rw.Write([]byte("{}"))
 }
 
 func handleGet(rw http.ResponseWriter, request *http.Request) {
@@ -55,7 +58,11 @@ func handleGet(rw http.ResponseWriter, request *http.Request) {
 	if err != nil {
 		panic(err)
 	}
+	rw.Header().Set("Content-Type", "application/json;charset=utf-8")
+	rw.Header().Set("Cache-Control", "max-age=0, no-cache, no-store")
+	rw.Header().Set("pragma", "no-cache")
 	rw.Write(b)
+	rw.WriteHeader(http.StatusOK)
 }
 
 func main() {
