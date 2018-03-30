@@ -27,33 +27,35 @@ function onInit() {
   }
 
   function sendData(temp) {
-  var content = '{"temperature": "' + temp + '"}';
-  var options = {
-    host: '10.130.11.0', // host ip (host name works as well)
-    port: 8080,            // (optional) port, defaults to 80
-    path: '/temperature/log',           // path sent to server
-    method: 'POST',
-    headers: { "Content-type" : "application/json",
-             "Content-length": content.length} 
-  };
-  
-  var req = require("http").request(options, function(res) {
-    console.log('res',res);
-    res.on('data', function(data) {
-      console.log("HTTP> "+data);
+    var content = '{"temperature": "' + temp + '"}';
+    var options = {
+      host: '10.130.11.0', // host ip (host name works as well)
+      port: 8080,            // (optional) port, defaults to 80
+      path: '/temperature/log',           // path sent to server
+      method: 'POST',
+      headers: {
+        "Content-type": "application/json",
+        "Content-length": content.length
+      }
+    };
+
+    var req = require("http").request(options, function (res) {
+      console.log('res', res);
+      res.on('data', function (data) {
+        console.log("HTTP> " + data);
+      });
+      res.on('close', function (data) {
+        console.log("Connection closed");
+      });
     });
-    res.on('close', function(data) {
-      console.log("Connection closed");
+
+    req.on('error', function (err) {
+      console.log(err);
     });
-  });
-  
-  req.on('error',function(err){
-    console.log(err);
-  });
-  
-  req.end(content);  
-  console.log("Request sent");  
-}
+
+    req.end(content);
+    console.log("Request sent");
+  }
 }
 
 save();  

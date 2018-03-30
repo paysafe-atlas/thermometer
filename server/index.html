@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.bundle.min.js"></script>
+  <title>Document</title>
+</head>
+
+<body>
+  <div>
+    <canvas id="line-chart" width="800" height="450"></canvas>
+  </div>
+
+  <script>
+    const ALLTEMPS_ENDPIONT = "http://10.130.11.0:8080/temperature/log";
+    const CURRENTTEMP_ENDPOINT = "http://10.130.11.0:8080/temperature/log";
+    window.config = {
+      type: 'line',
+      data: {
+        labels: [],
+        datasets: [{
+          data: [],
+          label: "Temperature",
+          borderColor: "#3e95cd",
+          fill: false
+        }
+        ]
+      },
+      options: {
+        title: {
+          display: true,
+          text: 'Temperature'
+        }
+      }
+    };
+
+    window.onload = function () {
+      window.graph = new Chart(document.getElementById("line-chart").getContext('2d'), config);
+      fetchAndDrawAllTemps();
+    };
+
+    var startTemperatureUpdate = function () {
+      setInterval(() => {
+
+      }, 1000);
+    };
+
+    var fetchCurrent = function () {
+    };
+
+    var fetchAll = function () {
+      return fetch(ALLTEMPS_ENDPIONT).then(response => response.json());
+    };
+
+    var lastTemperature = null;
+
+    var fetchAndDrawAllTemps = function () {
+      fetchAll().then(dataRaw => {
+        // const dataRaw = `[{"temperature":"29.5","dateCreated":"2018-03-30T15:54:10.697404379+03:00"},{"temperature":"30.6875","dateCreated":"2018-03-30T15:54:15.698052549+03:00"},{"temperature":"31.5625","dateCreated":"2018-03-30T15:54:20.695775044+03:00"},{"temperature":"31.875","dateCreated":"2018-03-30T15:54:25.697922849+03:00"},{"temperature":"31.875","dateCreated":"2018-03-30T15:54:30.696921+03:00"},{"temperature":"31.75","dateCreated":"2018-03-30T15:54:35.69903703+03:00"},{"temperature":"31.5625","dateCreated":"2018-03-30T15:54:40.699055503+03:00"},{"temperature":"31.375","dateCreated":"2018-03-30T15:54:45.694549649+03:00"},{"temperature":"31.125","dateCreated":"2018-03-30T15:54:50.700238991+03:00"},{"temperature":"30.9375","dateCreated":"2018-03-30T15:54:55.694933626+03:00"},{"temperature":"31.3125","dateCreated":"2018-03-30T15:55:00.696440241+03:00"},{"temperature":"31.5","dateCreated":"2018-03-30T15:55:05.698100904+03:00"},{"temperature":"31.4375","dateCreated":"2018-03-30T15:55:10.696898922+03:00"},{"temperature":"31.25","dateCreated":"2018-03-30T15:55:15.697779663+03:00"},{"temperature":"31.0625","dateCreated":"2018-03-30T15:55:20.697951672+03:00"},{"temperature":"30.875","dateCreated":"2018-03-30T15:55:25.697155105+03:00"},{"temperature":"30.6875","dateCreated":"2018-03-30T15:55:30.70578911+03:00"},{"temperature":"30.5","dateCreated":"2018-03-30T15:55:35.699204401+03:00"},{"temperature":"30.25","dateCreated":"2018-03-30T15:55:40.69649059+03:00"},{"temperature":"30.0625","dateCreated":"2018-03-30T15:55:45.700593807+03:00"},{"temperature":"29.875","dateCreated":"2018-03-30T15:55:50.696912463+03:00"},{"temperature":"29.6875","dateCreated":"2018-03-30T15:55:55.699178377+03:00"},{"temperature":"29.5","dateCreated":"2018-03-30T15:56:00.699513076+03:00"},{"temperature":"29.375","dateCreated":"2018-03-30T15:56:05.698291679+03:00"},{"temperature":"29.25","dateCreated":"2018-03-30T15:56:10.69697943+03:00"},{"temperature":"29.125","dateCreated":"2018-03-30T15:56:15.698228784+03:00"},{"temperature":"29","dateCreated":"2018-03-30T15:56:20.696607146+03:00"},{"temperature":"28.875","dateCreated":"2018-03-30T15:56:25.701047499+03:00"},{"temperature":"28.8125","dateCreated":"2018-03-30T15:56:30.703200526+03:00"},{"temperature":"28.6875","dateCreated":"2018-03-30T15:56:35.699639502+03:00"},{"temperature":"28.625","dateCreated":"2018-03-30T15:56:40.695448994+03:00"},{"temperature":"28.5625","dateCreated":"2018-03-30T15:56:45.70480857+03:00"},{"temperature":"28.4375","dateCreated":"2018-03-30T15:56:50.697518951+03:00"},{"temperature":"28.375","dateCreated":"2018-03-30T15:56:55.697168262+03:00"},{"temperature":"28.3125","dateCreated":"2018-03-30T15:57:00.698054459+03:00"},{"temperature":"28.25","dateCreated":"2018-03-30T15:57:05.69759631+03:00"},{"temperature":"28.1875","dateCreated":"2018-03-30T15:57:10.698819677+03:00"},{"temperature":"28.125","dateCreated":"2018-03-30T15:57:15.702013053+03:00"},{"temperature":"28.0625","dateCreated":"2018-03-30T15:57:20.698774511+03:00"},{"temperature":"28","dateCreated":"2018-03-30T15:57:25.697315432+03:00"},{"temperature":"27.9375","dateCreated":"2018-03-30T15:57:30.697790834+03:00"},{"temperature":"27.9375","dateCreated":"2018-03-30T15:57:35.700552909+03:00"},{"temperature":"27.875","dateCreated":"2018-03-30T15:57:40.699384489+03:00"},{"temperature":"27.8125","dateCreated":"2018-03-30T15:57:45.710021836+03:00"},{"temperature":"27.75","dateCreated":"2018-03-30T15:57:50.69808318+03:00"},{"temperature":"27.75","dateCreated":"2018-03-30T15:57:55.700031235+03:00"},{"temperature":"27.6875","dateCreated":"2018-03-30T15:58:00.698301942+03:00"},{"temperature":"27.625","dateCreated":"2018-03-30T15:58:05.698999104+03:00"},{"temperature":"27.5625","dateCreated":"2018-03-30T15:58:10.701280609+03:00"},{"temperature":"27.5625","dateCreated":"2018-03-30T15:58:15.699229843+03:00"},{"temperature":"27.5","dateCreated":"2018-03-30T15:58:20.69819043+03:00"},{"temperature":"27.5","dateCreated":"2018-03-30T15:58:25.699428421+03:00"},{"temperature":"27.5","dateCreated":"2018-03-30T15:58:30.70248261+03:00"},{"temperature":"27.4375","dateCreated":"2018-03-30T15:58:35.699104471+03:00"},{"temperature":"27.375","dateCreated":"2018-03-30T15:58:40.697643587+03:00"},{"temperature":"27.375","dateCreated":"2018-03-30T15:58:45.70196229+03:00"},{"temperature":"27.375","dateCreated":"2018-03-30T15:58:50.69941033+03:00"},{"temperature":"27.3125","dateCreated":"2018-03-30T15:58:55.699481745+03:00"},{"temperature":"27.3125","dateCreated":"2018-03-30T15:59:00.704826544+03:00"},{"temperature":"27.25","dateCreated":"2018-03-30T15:59:05.702972509+03:00"},{"temperature":"27.25","dateCreated":"2018-03-30T15:59:10.705479163+03:00"},{"temperature":"27.25","dateCreated":"2018-03-30T15:59:15.715494453+03:00"},{"temperature":"27.1875","dateCreated":"2018-03-30T15:59:20.703212766+03:00"},{"temperature":"27.1875","dateCreated":"2018-03-30T15:59:25.700794742+03:00"},{"temperature":"27.1875","dateCreated":"2018-03-30T15:59:30.698839907+03:00"},{"temperature":"27.1875","dateCreated":"2018-03-30T15:59:35.701176172+03:00"},{"temperature":"27.125","dateCreated":"2018-03-30T15:59:40.732228252+03:00"},{"temperature":"27.125","dateCreated":"2018-03-30T15:59:45.699185594+03:00"},{"temperature":"27.125","dateCreated":"2018-03-30T15:59:50.699177638+03:00"},{"temperature":"27.0625","dateCreated":"2018-03-30T15:59:55.700594949+03:00"},{"temperature":"27.0625","dateCreated":"2018-03-30T16:00:00.699947391+03:00"},{"temperature":"27.0625","dateCreated":"2018-03-30T16:00:05.701229578+03:00"},{"temperature":"27.0625","dateCreated":"2018-03-30T16:00:10.69986611+03:00"},{"temperature":"27.0625","dateCreated":"2018-03-30T16:00:15.699189492+03:00"},{"temperature":"27","dateCreated":"2018-03-30T16:00:20.701712121+03:00"},{"temperature":"27","dateCreated":"2018-03-30T16:00:25.70208355+03:00"},{"temperature":"27","dateCreated":"2018-03-30T16:00:30.706015667+03:00"},{"temperature":"27","dateCreated":"2018-03-30T16:00:35.699241351+03:00"},{"temperature":"26.9375","dateCreated":"2018-03-30T16:00:40.700210406+03:00"},{"temperature":"26.9375","dateCreated":"2018-03-30T16:00:45.700403068+03:00"},{"temperature":"26.9375","dateCreated":"2018-03-30T16:00:50.700164354+03:00"},{"temperature":"26.9375","dateCreated":"2018-03-30T16:00:55.699813589+03:00"},{"temperature":"26.9375","dateCreated":"2018-03-30T16:01:00.700351289+03:00"},{"temperature":"26.9375","dateCreated":"2018-03-30T16:01:05.700342108+03:00"},{"temperature":"26.875","dateCreated":"2018-03-30T16:01:10.709236634+03:00"},{"temperature":"26.875","dateCreated":"2018-03-30T16:01:15.699935549+03:00"},{"temperature":"26.875","dateCreated":"2018-03-30T16:01:20.699971303+03:00"},{"temperature":"26.875","dateCreated":"2018-03-30T16:01:25.701001672+03:00"},{"temperature":"26.875","dateCreated":"2018-03-30T16:01:30.699615612+03:00"},{"temperature":"26.875","dateCreated":"2018-03-30T16:01:35.701912993+03:00"},{"temperature":"26.875","dateCreated":"2018-03-30T16:01:40.704283118+03:00"},{"temperature":"26.8125","dateCreated":"2018-03-30T16:01:45.70914814+03:00"},{"temperature":"26.8125","dateCreated":"2018-03-30T16:01:50.699328101+03:00"},{"temperature":"26.875","dateCreated":"2018-03-30T16:01:55.698941095+03:00"},{"temperature":"26.8125","dateCreated":"2018-03-30T16:02:00.700725529+03:00"},{"temperature":"26.8125","dateCreated":"2018-03-30T16:02:05.70550911+03:00"},{"temperature":"26.8125","dateCreated":"2018-03-30T16:02:10.700447973+03:00"},{"temperature":"26.8125","dateCreated":"2018-03-30T16:02:15.707282076+03:00"},{"temperature":"26.8125","dateCreated":"2018-03-30T16:02:20.705864073+03:00"},{"temperature":"26.8125","dateCreated":"2018-03-30T16:02:25.699677757+03:00"},{"temperature":"26.8125","dateCreated":"2018-03-30T16:02:30.700948329+03:00"},{"temperature":"26.75","dateCreated":"2018-03-30T16:02:35.704490498+03:00"},{"temperature":"26.75","dateCreated":"2018-03-30T16:02:40.702939342+03:00"},{"temperature":"26.75","dateCreated":"2018-03-30T16:02:45.701917726+03:00"},{"temperature":"26.75","dateCreated":"2018-03-30T16:02:50.698132874+03:00"},{"temperature":"26.75","dateCreated":"2018-03-30T16:02:55.700977525+03:00"},{"temperature":"26.75","dateCreated":"2018-03-30T16:03:00.702868603+03:00"},{"temperature":"26.75","dateCreated":"2018-03-30T16:03:05.702093813+03:00"},{"temperature":"26.75","dateCreated":"2018-03-30T16:03:10.700677524+03:00"},{"temperature":"26.75","dateCreated":"2018-03-30T16:03:15.718125049+03:00"},{"temperature":"26.75","dateCreated":"2018-03-30T16:03:20.702786345+03:00"},{"temperature":"26.75","dateCreated":"2018-03-30T16:03:25.702099268+03:00"},{"temperature":"26.75","dateCreated":"2018-03-30T16:03:30.701885301+03:00"},{"temperature":"26.75","dateCreated":"2018-03-30T16:03:35.703657802+03:00"},{"temperature":"26.75","dateCreated":"2018-03-30T16:03:40.70967688+03:00"},{"temperature":"26.6875","dateCreated":"2018-03-30T16:03:45.702011199+03:00"},{"temperature":"26.75","dateCreated":"2018-03-30T16:03:50.707191017+03:00"},{"temperature":"26.6875","dateCreated":"2018-03-30T16:03:55.704727801+03:00"},{"temperature":"26.6875","dateCreated":"2018-03-30T16:04:00.701475022+03:00"},{"temperature":"26.6875","dateCreated":"2018-03-30T16:04:05.701402318+03:00"},{"temperature":"26.6875","dateCreated":"2018-03-30T16:04:10.702352026+03:00"},{"temperature":"26.6875","dateCreated":"2018-03-30T16:04:15.708127257+03:00"},{"temperature":"26.6875","dateCreated":"2018-03-30T16:04:20.702793389+03:00"},{"temperature":"26.6875","dateCreated":"2018-03-30T16:04:25.702300792+03:00"},{"temperature":"26.6875","dateCreated":"2018-03-30T16:04:30.70416762+03:00"},{"temperature":"26.6875","dateCreated":"2018-03-30T16:04:35.704288573+03:00"},{"temperature":"26.6875","dateCreated":"2018-03-30T16:04:40.702314359+03:00"},{"temperature":"26.6875","dateCreated":"2018-03-30T16:04:45.703302985+03:00"},{"temperature":"26.6875","dateCreated":"2018-03-30T16:04:50.701973862+03:00"},{"temperature":"26.6875","dateCreated":"2018-03-30T16:04:55.701862538+03:00"},{"temperature":"26.6875","dateCreated":"2018-03-30T16:05:00.70521867+03:00"},{"temperature":"26.6875","dateCreated":"2018-03-30T16:05:05.7011082+03:00"},{"temperature":"26.6875","dateCreated":"2018-03-30T16:05:10.70261723+03:00"},{"temperature":"26.6875","dateCreated":"2018-03-30T16:05:15.705136201+03:00"},{"temperature":"26.6875","dateCreated":"2018-03-30T16:05:20.704450138+03:00"},{"temperature":"26.6875","dateCreated":"2018-03-30T16:05:25.711978578+03:00"},{"temperature":"26.6875","dateCreated":"2018-03-30T16:05:30.703793469+03:00"},{"temperature":"26.6875","dateCreated":"2018-03-30T16:05:35.702968349+03:00"},{"temperature":"26.6875","dateCreated":"2018-03-30T16:05:40.709648246+03:00"},{"temperature":"26.6875","dateCreated":"2018-03-30T16:05:45.705317505+03:00"},{"temperature":"26.6875","dateCreated":"2018-03-30T16:05:50.703760526+03:00"},{"temperature":"26.625","dateCreated":"2018-03-30T16:05:55.712680887+03:00"},{"temperature":"26.6875","dateCreated":"2018-03-30T16:06:00.718811023+03:00"},{"temperature":"26.625","dateCreated":"2018-03-30T16:06:05.704294443+03:00"},{"temperature":"26.625","dateCreated":"2018-03-30T16:06:10.703626467+03:00"},{"temperature":"26.625","dateCreated":"2018-03-30T16:06:15.704229837+03:00"},{"temperature":"26.625","dateCreated":"2018-03-30T16:06:20.704057287+03:00"},{"temperature":"26.625","dateCreated":"2018-03-30T16:06:25.711609033+03:00"},{"temperature":"26.625","dateCreated":"2018-03-30T16:06:30.702704454+03:00"},{"temperature":"26.625","dateCreated":"2018-03-30T16:06:35.705740002+03:00"}]`;
+
+        const tempData = JSON.parse(dataRaw);
+
+        for (tempObj of tempData) {
+          lastTemperature = toTempObject(tempObj);
+          addTemperature(lastTemperature)
+        }
+        window.graph.update();
+      });
+    };
+
+    toTempObject = function (rawTemObject) {
+      return {
+        temperature: parseFloat(tempObj.temperature),
+        dateCreated: new Date(tempObj.dateCreated)
+      };
+    }
+
+    addTemperature = function (tempObj) {
+      window.config.data.labels.push(tempObj.dateCreated);
+      window.config.data.datasets[0].data.push(tempObj.temperature);
+    }
+
+  </script>
+</body>
+
+</html>
