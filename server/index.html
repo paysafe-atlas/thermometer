@@ -6,17 +6,43 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.bundle.min.js"></script>
-  <title>Document</title>
+  <style>
+    body {
+      font-family: Sans-Serif;
+      font-size: 1.5em;
+    }
+    ul {
+      display: flex;
+      justify-content: center;
+      list-style: none;
+      margin: 0;
+      left: 50;
+    }
+    ul li {
+      margin-right: 2em;
+    }
+  </style>
 </head>
 
 <body>
-  <div>
-    <canvas id="line-chart" width="800" height="450"></canvas>
+  <nav>
+    <ul>
+      <li>
+        <span id="current-temperature-span">Current: </span>
+      </li>
+      <li>
+        <label for="enable-updates-checkbox">Enable updates</label>
+        <input type="checkbox" id="enable-updates-checkbox" onclick="triggerAutoUpdate(event)">
+      </li>
+    </ul>
+  </nav>
+  <div class="chart-container" style="position: relative; height:100px; width:90vw; margin: auto">
+    <canvas id="line-chart"></canvas>
   </div>
 
   <script>
-    const ALLTEMPS_ENDPIONT = "http://10.130.11.0:8080/temperature/log";
-    const CURRENTTEMP_ENDPOINT = "http://10.130.11.0:8080/temperature/log/last";
+    const ALLTEMPS_ENDPIONT = "http://localhost:8080/temperature/log?limit=300";
+    const CURRENTTEMP_ENDPOINT = "http://localhost:8080/temperature/log/last";
     window.config = {
       type: 'line',
       data: {
@@ -30,24 +56,54 @@
         ]
       },
       options: {
-        title: {
-          display: true,
-          text: 'Temperature'
-        }
+        legend: {
+          display: false
+        },
+        scales: {
+          xAxes: [{
+            type: 'time',
+            // time: {
+            //   displayFormats: {
+            //     'millisecond': 'MMM DD',
+            //     'second': 'MMM DD',
+            //     'minute': 'MMM DD',
+            //     'hour': 'MMM DD',
+            //     'day': 'MMM DD',
+            //     'week': 'MMM DD',
+            //     'month': 'MMM DD',
+            //     'quarter': 'MMM DD',
+            //     'year': 'MMM DD',
+            //   }
+            // }
+          }],
+        },
       }
     };
 
     var lastTemperature = null;
+    var autoUpdateSetIntervalId = null;
+    var currentTemperatureElement = document.getElementById("current-temperature-span");
 
     window.onload = function () {
       window.graph = new Chart(document.getElementById("line-chart").getContext('2d'), config);
       fetchAndDrawAllTemps();
     };
 
+    var updateCurrentTemperature = function (currentTemp) {
+      currentTemperatureElement.textContent = currentTemp;
+    }
+
     var startTemperatureUpdate = function () {
-      setInterval(() => {
-        fetchCurrent();
-      }, 1000);
+      if (autoUpdateSetIntervalId === null) {
+        autoUpdateSetIntervalId = setInterval(() => {
+          fetchCurrent();
+        }, 1000);
+      }
+    };
+
+    var stopTemperatureUpdate = function () {
+      clearInterval(autoUpdateSetIntervalId);
+      autoUpdateSetIntervalId = null;
     };
 
     var fetchCurrent = function () {
@@ -78,8 +134,6 @@
           addTemperature(lastTemperature)
         }
         window.graph.update();
-
-        startTemperatureUpdate();
       }).catch(
         error => {
           console.log(JSON.stringify(error))
@@ -96,6 +150,17 @@
     addTemperature = function (tempObj) {
       window.config.data.labels.push(tempObj.dateCreated);
       window.config.data.datasets[0].data.push(tempObj.temperature);
+      updateCurrentTemperature("Current: " + tempObj.temperature + "°C");
+    }
+
+    triggerAutoUpdate = function (event) {
+      if (event.target.checked) {
+        console.log("Enabling autoupdate");
+        startTemperatureUpdate();
+      } else {
+        console.log("Disabling autoupdate");
+        stopTemperatureUpdate();
+      }
     }
 
   </script>

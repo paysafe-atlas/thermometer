@@ -1,22 +1,24 @@
 package main
 
 import (
+	"bufio"
+	"encoding/csv"
 	"encoding/json"
 	"fmt"
-	"net/http"
-	"time"
-	"os"
-	"encoding/csv"
-	"bufio"
 	"io"
 	"log"
+	"net/http"
+	"os"
+	"strconv"
+	"time"
 )
 
 var history []temperatureLog
+
 const fileLocation = "historyFile.csv"
 
 type temperatureLog struct {
-	Temperature string `json:"temperature"`
+	Temperature string    `json:"temperature"`
 	DateCreated time.Time `json:"dateCreated"`
 }
 
@@ -26,15 +28,15 @@ type testStruct struct {
 
 func main() {
 	loadHistory()
-	http.HandleFunc("/temperature/log", parseGhPost)
+	http.HandleFunc("/temperature/log", getAllEntries)
 	http.HandleFunc("/temperature/log/last", getLastLogEntry)
 	if err := http.ListenAndServe(":8080", nil); err != nil {
 		panic(err)
 	}
-	fmt.Println("Successfully loaded file and server started on port 8080!");
+	fmt.Println("Successfully loaded file and server started on port 8080!")
 }
 
-func parseGhPost(rw http.ResponseWriter, request *http.Request) {
+func getAllEntries(rw http.ResponseWriter, request *http.Request) {
 	rw.Header().Set("Access-Control-Allow-Origin", request.Header.Get("Origin"))
 	rw.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
 	if request.Method == "GET" {
@@ -56,7 +58,6 @@ func handlePost(rw http.ResponseWriter, request *http.Request) {
 		panic(err)
 	}
 
-	// f, err := strconv.ParseFloat("3.1415", 64)
 	fmt.Println(t.Temperature)
 
 	var tempLog temperatureLog
@@ -73,15 +74,28 @@ func handlePost(rw http.ResponseWriter, request *http.Request) {
 }
 
 func handleGet(rw http.ResponseWriter, request *http.Request) {
-	var b, err = json.Marshal(history)
+	var queryParams = request.URL.Query()
+	var limitValues = queryParams["limit"]
+	var historyLen = len(history)
+	var limit = historyLen
+
+	if limitValues != nil {
+		limit64, _ := strconv.ParseInt(limitValues[0], 10, 64)
+		limit = int(limit64)
+		if limit > historyLen {
+			limit = historyLen
+		}
+	}
+
+	var b, err = json.Marshal(history[historyLen-limit : historyLen])
 	if err != nil {
 		panic(err)
 	}
 	rw.Header().Set("Content-Type", "application/json;charset=utf-8")
 	rw.Header().Set("Cache-Control", "max-age=0, no-cache, no-store")
 	rw.Header().Set("pragma", "no-cache")
-	rw.Write(b)
 	rw.WriteHeader(http.StatusOK)
+	rw.Write(b)
 }
 
 func getLastLogEntry(rw http.ResponseWriter, request *http.Request) {
@@ -91,7 +105,7 @@ func getLastLogEntry(rw http.ResponseWriter, request *http.Request) {
 		rw.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
-	var lastEntry = history[len(history) - 1]
+	var lastEntry = history[len(history)-1]
 	var b, err = json.Marshal(lastEntry)
 	if err != nil {
 		panic(err)
@@ -99,8 +113,8 @@ func getLastLogEntry(rw http.ResponseWriter, request *http.Request) {
 	rw.Header().Set("Content-Type", "application/json;charset=utf-8")
 	rw.Header().Set("Cache-Control", "max-age=0, no-cache, no-store")
 	rw.Header().Set("pragma", "no-cache")
-	rw.Write(b)
 	rw.WriteHeader(http.StatusOK)
+	rw.Write(b)
 }
 
 func loadHistory() {
