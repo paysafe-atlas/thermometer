@@ -28,6 +28,7 @@ type testStruct struct {
 
 func main() {
 	loadHistory()
+	http.Handle("/", http.FileServer(http.Dir("static")))
 	http.HandleFunc("/temperature/log", getAllEntries)
 	http.HandleFunc("/temperature/log/last", getLastLogEntry)
 	if err := http.ListenAndServe(":8080", nil); err != nil {

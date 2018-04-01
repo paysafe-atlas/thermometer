@@ -1,7 +1,7 @@
 function onInit() {
   const WIFI_NAME = "PaysafeGuest";
   const WIFI_OPTIONS = { password: "Courag3ous" };
-  const MEASURE_INTERVAL = 5000;
+  const MEASURE_INTERVAL = 5*1000;
 
   const wifi = require("Wifi");
   var http = require("http");
